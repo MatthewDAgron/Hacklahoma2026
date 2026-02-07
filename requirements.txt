@@ -1,1 +1,3 @@
 ultralytics>=8.4.12
+pymongo>=4.6.0
+python-dotenv>=1.0.0
