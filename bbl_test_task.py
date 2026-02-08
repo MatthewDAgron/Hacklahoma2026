@@ -17,8 +17,8 @@ def badPosture(filename = 0):
             (x2 - x1)**2 + (y2 - y1)**2 ) * y1) )
         degree = int(180/m.pi)*theta
         return degree
-    def sendWarning(x):
-        pass
+    def sendWarning(image, font, red, w, h):
+        cv2.putText(image, 'Fix posture', (w // 2 - 100, h // 2), font, 1, red, 2)
     # Initialize frame counters.
     good_frames = 0
     bad_frames  = 0
@@ -66,44 +66,45 @@ def badPosture(filename = 0):
 
 
         # Capture frames.
+        frame_rate = cap.get(cv2.CAP_PROP_FPS) or 30
+        frame_index = 0
         while True:
             success, image = cap.read()
             if not success:
                 print("Null.Frames")
                 break
-            fps = cap.get(cv2.CAP_PROP_FPS)
+            fps = cap.get(cv2.CAP_PROP_FPS) or 30
             # Get height and width of the frame.
             h, w = image.shape[:2]
 
             # Convert the BGR image to RGB.
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            rgb_frame = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-            # Process the image.
-            keypoints = landmarker.detect_for_video(image, cap.get(cv2.CAP_PROP_POS_MSEC))
+            # Process the image - Tasks API requires mp.Image, not numpy array.
+            frame_timestamp_ms = int(frame_index * 1000 / frame_rate)
+            frame_index += 1
+            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
+            keypoints = landmarker.detect_for_video(mp_image, frame_timestamp_ms)
 
-            # Convert the image back to BGR.
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            # Use image in BGR for OpenCV drawing.
+            image = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
 
-            # Use lm and lmPose as representative of the following methods.
-            lm = keypoints.pose_landmarks
-            if lm is None:
+            # Tasks API: pose_landmarks[0] = first person, access by index (11=left shoulder, etc.)
+            if not keypoints.pose_landmarks:
+                cv2.imshow('Posture', image)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
                 continue
-            lmPose = mp.tasks.vision.PoseLandmark
-            # Left shoulder.
-            l_shldr_x = int(lm.landmark[lmPose.LEFT_SHOULDER].x * w)
-            l_shldr_y = int(lm.landmark[lmPose.LEFT_SHOULDER].y * h)
-
-            # Right shoulder.
-            r_shldr_x = int(lm.landmark[lmPose.RIGHT_SHOULDER].x * w)
-            r_shldr_y = int(lm.landmark[lmPose.RIGHT_SHOULDER].y * h)
-
-            # Left ear.
-            l_ear_x = int(lm.landmark[lmPose.LEFT_EAR].x * w)
-            l_ear_y = int(lm.landmark[lmPose.LEFT_EAR].y * h)
-
-            # Left hip.
-            l_hip_x = int(lm.landmark[lmPose.LEFT_HIP].x * w)
-            l_hip_y = int(lm.landmark[lmPose.LEFT_HIP].y * h)
+            landmarks = keypoints.pose_landmarks[0]
+            # Indices: 7=left ear, 8=right ear, 11=left shoulder, 12=right shoulder, 23=left hip, 24=right hip
+            l_shldr_x = int(landmarks[11].x * w)
+            l_shldr_y = int(landmarks[11].y * h)
+            r_shldr_x = int(landmarks[12].x * w)
+            r_shldr_y = int(landmarks[12].y * h)
+            l_ear_x = int(landmarks[7].x * w)
+            l_ear_y = int(landmarks[7].y * h)
+            l_hip_x = int(landmarks[23].x * w)
+            l_hip_y = int(landmarks[23].y * h)
 
             # Calculate distance between left shoulder and right shoulder points.
             offset = findDistance(l_shldr_x, l_shldr_y, r_shldr_x, r_shldr_y)
@@ -178,9 +179,9 @@ def badPosture(filename = 0):
                 time_string_bad = 'Bad Posture Time : ' + str(round(bad_time, 1)) + 's'
                 cv2.putText(image, time_string_bad, (10, h - 20), font, 0.9, red, 2)
 
-            # If you stay in bad posture for more than 3 minutes (180s) send an alert.
-            if bad_time > 180:
-                sendWarning(1)
+            # If you stay in bad posture for more than 5 seconds, show alert.
+            if bad_time > 5:
+                sendWarning(image, font, red, w, h)
 
             #video_output.write(image)
             cv2.imshow('Posture', image)
