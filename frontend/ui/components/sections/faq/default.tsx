@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { ReactNode } from "react";
-
-import { siteConfig } from "@/config/site";
-
+import { siteConfig } from "@/config/site"; // Make sure this path matches your project
 import {
   Accordion,
   AccordionContent,
@@ -24,123 +22,50 @@ interface FAQProps {
 }
 
 export default function FAQ({
-  title = "Questions and Answers",
+  title = "System Capabilities",
   items = [
     {
-      question:
-        "Why building a great landing page is critical for your business?",
+      question: "How is the trend data calculated?",
       answer: (
-        <>
-          <p className="text-muted-foreground mb-4 max-w-[640px] text-balance">
-            In today&apos;s AI-driven world, standing out is harder than ever.
-            While anyone can build a product, a professional landing page makes
-            the difference between success and failure.
-          </p>
-          <p className="text-muted-foreground mb-4 max-w-[640px] text-balance">
-            Launch UI helps you ship faster without compromising on quality.
-          </p>
-        </>
-      ),
-    },
-    {
-      question: "Why use Launch UI instead of a no-code tool?",
-      answer: (
-        <>
-          <p className="text-muted-foreground mb-4 max-w-[600px]">
-            No-code tools lock you into their ecosystem with recurring fees and
-            limited control. They often come with performance issues and make it
-            difficult to integrate with your product.
-          </p>
-          <p className="text-muted-foreground mb-4 max-w-[600px]">
-            You can&apos;t even change your hosting provider and basic things
-            like web analytics come as extra costs and paid add-ons.
-          </p>
-          <p className="text-muted-foreground mb-4 max-w-[600px]">
-            What might seem like a convenient solution today could paint you
-            into a corner tomorrow, limiting your ability to scale and adapt.
-            Launch UI gives you full control of your code while maintaining
-            professional quality.
-          </p>
-        </>
-      ),
-    },
-    {
-      question:
-        "How Launch UI is different from other components libraries and templates?",
-      answer: (
-        <>
-          <p className="text-muted-foreground mb-4 max-w-[580px]">
-            Launch UI stands out with premium design quality and delightful
-            touches of custom animations and illustrations.
-          </p>
-          <p className="text-muted-foreground mb-4 max-w-[580px]">
-            All components are carefully crafted to help position your product
-            as a professional tool, avoiding the generic template look.
-          </p>
-          <p className="text-muted-foreground mb-4 max-w-[640px] text-balance">
-            Unlike many libraries that rely on outdated CSS practices and old
-            dependencies, Launch UI is built with modern technologies and best
-            practices in mind.
-          </p>
-        </>
-      ),
-    },
-    {
-      question: 'Why exactly does it mean that "The code is yours"?',
-      answer: (
-        <>
-          <p className="text-muted-foreground mb-4 max-w-[580px]">
-            The basic version of Launch UI is open-source and free forever,
-            under a do-whatever-you-want license.
-          </p>
-          <p className="text-muted-foreground mb-4 max-w-[580px]">
-            The pro version that contains more components and options is a
-            one-time purchase that gives you lifetime access to all current and
-            future content. Use it for unlimited personal and commercial
-            projects - no recurring fees or restrictions.
-          </p>
-          <p className="text-muted-foreground mb-4 max-w-[580px]">
-            For complete details about licensing and usage rights, check out{" "}
-            <Link href="/pricing" className="text-foreground underline">
-              the pricing page
-            </Link>
-            .
-          </p>
-        </>
-      ),
-    },
-    {
-      question: "Are Figma files included?",
-      answer: (
-        <p className="text-muted-foreground mb-4 max-w-[580px]">
-          Yes! The complete Launch UI template is available for free on the{" "}
-          <Link
-            href="https://www.figma.com/community/file/1420131743903900629/launch-ui-landing-page-components-ui-kit"
-            className="text-foreground underline"
-          >
-            Figma community
-          </Link>
-          .
+        <p className="text-muted-foreground mb-4 max-w-[640px] text-balance">
+          We utilize real-time computer vision pipelines running on edge devices (Raspberry Pi). 
+          Video feeds are processed to extract crowd density, movement vectors, and object interaction rates, 
+          which are then aggregated into our trend visualization engine.
         </p>
       ),
     },
     {
-      question: "Can I get a discount?",
+      question: "Is the data truly real-time?",
+      answer: (
+        <p className="text-muted-foreground mb-4 max-w-[600px]">
+          Yes. The system uses a low-latency MJPEG stream for visual verification and 
+          websockets for data transmission. The typical latency between an event occurring 
+          and it appearing on the trend graph is under 200 milliseconds.
+        </p>
+      ),
+    },
+    {
+      question: "What hardware is required for deployment?",
       answer: (
         <>
           <p className="text-muted-foreground mb-4 max-w-[580px]">
-            Actually, yes! I&apos;m always acively looking for beta testers of
-            new features. If you are interested in exchanging feedback for a
-            discount, please contact me via{" "}
-            <a
-              href={siteConfig.links.email}
-              className="underline underline-offset-2"
-            >
-              email
-            </a>
-            .
+            The system is designed to be hardware-agnostic, but optimized for ARM-based 
+            edge computing.
+          </p>
+          <p className="text-muted-foreground mb-4 max-w-[640px] text-balance">
+            Currently deployed on Raspberry Pi 4/5 units with standard camera modules. 
+            The central processing and dashboarding can run on any standard Linux server or cloud instance.
           </p>
         </>
+      ),
+    },
+    {
+      question: "Can I export the trend reports?",
+      answer: (
+        <p className="text-muted-foreground mb-4 max-w-[580px]">
+          All data points are stored in MongoDB and can be exported as CSV or JSON 
+          for further analysis in tools like R, Python Pandas, or Excel.
+        </p>
       ),
     },
   ],

@@ -1,11 +1,7 @@
 import CTA from "../components/sections/cta/default";
 import FAQ from "../components/sections/faq/default";
-import Footer from "../components/sections/footer/default";
 import Hero from "../components/sections/hero/default";
-import Items from "../components/sections/items/default";
-import Logos from "../components/sections/logos/default";
 import Navbar from "../components/sections/navbar/default";
-import Pricing from "../components/sections/pricing/default";
 import Stats from "../components/sections/stats/default";
 import { LayoutLines } from "../components/ui/layout-lines";
 
@@ -14,14 +10,22 @@ export default function Home() {
     <main className="bg-background text-foreground min-h-screen w-full">
       <LayoutLines />
       <Navbar />
-      <Hero />
-      <Logos />
-      <Items />
+      
+      {/* 1. The Big Intro */}
+      <Hero /> 
+      
+      {/* 2. Show the hard numbers immediately (Trend Data) */}
       <Stats />
-      <Pricing />
+      
+      {/* 4. Common Questions */}
       <FAQ />
+      
+      {/* 5. "View Dashboard" button */}
       <CTA />
-      <Footer />
+      
+      <div className="w-full py-8 text-center text-muted-foreground text-sm border-t border-white/10 mt-12">
+        <p>Built with ☕ and 🥧 at Hacklahoma 2026</p>
+      </div>
     </main>
   );
 }

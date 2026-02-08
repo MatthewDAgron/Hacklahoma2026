@@ -37,3 +37,5 @@ frontend/ui/.vercel
 
 # Optional: large binary assets (uncomment if you don't commit .task models)
 # *.task
+node_modules/*
+frontend/ui/package-lock.json
