@@ -18,7 +18,7 @@ export default function Hero() {
          rgba(249, 115, 22, 0.4) is BRIGHT ORANGE 
       */}
 
-      <div className="container flex flex-col items-center gap-8 pb-8 pt-24 md:py-32">
+      <div className="container mx-auto flex flex-col items-center gap-8 pb-8 pt-24 md:py-32">
         
         {/* 1. The Badge */}
         <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80">
@@ -50,14 +50,28 @@ export default function Hero() {
           </Button>
         </div>
 
-        {/* 5. The Image */}
-        <div className="mt-8 w-full max-w-5xl overflow-hidden rounded-xl border bg-background shadow-xl">
+        {/* 5. The Hero Image (Posture Cartoon) */}
+        <div className="mt-8 w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-2xl relative group">
+          
+          {/* The Image */}
           <img
-            src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2670&auto=format&fit=crop"
-            alt="Dashboard Preview"
-            className="w-full object-cover opacity-90 dark:opacity-80"
+            src="/posture.jpg"
+            alt="AI Posture Correction Guide"
+            className="w-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-500 hover:scale-105"
             style={{ maxHeight: "500px" }}
           />
+
+          {/* Optional: 'AI Analysis' Overlay Badge */}
+          <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-green-500/30 flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-[10px] font-mono text-green-400 uppercase tracking-wider">
+              Pose Estimation Active
+            </span>
+          </div>
+          
         </div>
         
       </div>
