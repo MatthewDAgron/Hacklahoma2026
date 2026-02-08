@@ -3,7 +3,9 @@ import json
 import pymongo
 import sys
 from bbl_test_task import badPosture
+import dotenv
 
+dotenv.load_dotenv(".env")
 
 """
 Database planning:
@@ -24,6 +26,7 @@ def check_results(user_id, video):
     # TODO
 
 
+
     Mongo_Str = os.getenv("MONGO_STR")
     DB_NAME = "weekly_logs"
 
@@ -40,10 +43,14 @@ def check_results(user_id, video):
     except:
         print("failed connection, please try again")
         sys.exit(1)
+
+    
+
     
 
     data = badPosture(video)
 
+    chiroDict = {"employee_uuid": user_id, "avg_neck_angle":data[0], "avg_back_angle": data[1], "shoulder_offset":data[2], "datetime":data[3], "time_passed":data[4]}
 
 
-    pass
+    return chiroDict
