@@ -3,3 +3,4 @@ pymongo>=4.6.0
 python-dotenv>=1.0.0
 opencv-python>=4.13.0
 mediapipe>=0.10.32
+pygame>=2.5.0
