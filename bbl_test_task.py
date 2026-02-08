@@ -2,10 +2,8 @@ import cv2
 import time
 import math as m
 import mediapipe as mp
-
-
-
-
+from elevenlabs_tts import play_audio
+import pygame
 
 def badPosture(filename = 0):
     def findDistance(x1, y1, x2, y2):
@@ -56,6 +54,10 @@ def badPosture(filename = 0):
 
         # For webcam input use 0 (integer). For video file use a path string.
         cap = cv2.VideoCapture(filename)
+        if not cap.isOpened():
+            print("Could not open camera or video. In WSL/Linux, use a video file path or run this script on Windows for webcam.")
+            print("Example: badPosture('path/to/video.mp4')")
+            return
 
         # Meta.
         fps = int(cap.get(cv2.CAP_PROP_FPS))
@@ -182,14 +184,17 @@ def badPosture(filename = 0):
             # If you stay in bad posture for more than 5 seconds, show alert.
             if bad_time > 5:
                 sendWarning(image, font, red, w, h)
-
+                play_audio('ElevenLabs_2026-02-08T03_10_28_Northern Terry_pvc_sp87_s30_sb90_se38_b_m2.mp3')
             #video_output.write(image)
             cv2.imshow('Posture', image)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            # Wait so video plays at real speed (~1/fps seconds per frame). For webcam, fps is used too.
+            delay_ms = max(1, int(1000 / (fps or 30)))
+            if cv2.waitKey(delay_ms) & 0xFF == ord('q'):
                 break
 
         cap.release()
         #video_output.release()
         cv2.destroyAllWindows()
 
-badPosture()
+# Use a video file path, or 0 for webcam (when run on Windows).
+badPosture('videos/input.avi')
