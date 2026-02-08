@@ -3,9 +3,15 @@ import time
 import math as m
 import mediapipe as mp
 from elevenlabs_tts import play_audio
-import pygame
 
 def badPosture(filename = 0):
+
+
+    returning_list = list()
+    angle_tracking_neck = list()
+    angle_tracking_back = list()
+    offset_tracking_shoulders = list()
+
     def findDistance(x1, y1, x2, y2):
         dist = m.sqrt((x2-x1)**2+(y2-y1)**2)
         return dist
@@ -155,9 +161,21 @@ def badPosture(filename = 0):
                 cv2.line(image, (l_hip_x, l_hip_y), (l_shldr_x, l_shldr_y), green, 4)
                 cv2.line(image, (l_hip_x, l_hip_y), (l_hip_x, l_hip_y - 100), green, 4)
 
+                angle_tracking_back = list()
+                angle_tracking_neck = list()
+                offset_tracking_shoulders = list()
+
             else:
                 good_frames = 0
                 bad_frames += 1
+
+                angle_tracking_neck.append(neck_inclination)
+                angle_tracking_back.append(torso_inclination)
+                # get offset between shoulder points - just x should be fine
+                offset_tracking_shoulders.append(findDistance(l_shldr_x, 0, r_shldr_x, 0))
+
+                
+
 
                 cv2.putText(image, angle_text_string, (10, 30), font, 0.9, red, 2)
                 cv2.putText(image, str(int(neck_inclination)), (l_shldr_x + 10, l_shldr_y), font, 0.9, red, 2)
@@ -183,8 +201,18 @@ def badPosture(filename = 0):
 
             # If you stay in bad posture for more than 5 seconds, show alert.
             if bad_time > 5:
+
+
+                def getAvg(items: list):
+                    sum = 0
+                    for item in items:
+                        sum += item
+                    return sum/len(items)
+                returning_list.append(getAvg(angle_tracking_neck), getAvg(angle_tracking_back), getAvg(offset_tracking_shoulders))
+
                 sendWarning(image, font, red, w, h)
                 play_audio('ElevenLabs_2026-02-08T03_10_28_Northern Terry_pvc_sp87_s30_sb90_se38_b_m2.mp3')
+
             #video_output.write(image)
             cv2.imshow('Posture', image)
             # Wait so video plays at real speed (~1/fps seconds per frame). For webcam, fps is used too.
