@@ -1,3 +1,39 @@
-.venv/*
-my_env/*
+# Environment / secrets
 .env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+my_env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Django (frontend)
+frontend/db.sqlite3
+frontend/*.log
+frontend/staticfiles/
+frontend/media/
+
+# Next.js / Node (frontend/ui)
+frontend/ui/node_modules/
+frontend/ui/.next/
+frontend/ui/out/
+frontend/ui/.vercel
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Optional: large binary assets (uncomment if you don't commit .task models)
+# *.task
