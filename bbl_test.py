@@ -18,6 +18,7 @@ def findAngle(x1, y1, x2, y2):
     degree = int(180/m.pi)*theta
     return degree
 def sendWarning(x):
+    cv2.putText(image, ' FIX YO SHIT! ', (200, 200), font, 0.9, red, 2)
     pass
 # Initialize frame counters.
 good_frames = 0
@@ -165,7 +166,7 @@ while True:
         cv2.putText(image, time_string_bad, (10, h - 20), font, 0.9, red, 2)
 
     # If you stay in bad posture for more than 3 minutes (180s) send an alert.
-    if bad_time > 180:
+    if bad_time > 3:
         sendWarning(1)
 
     #video_output.write(image)
