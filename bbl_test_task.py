@@ -3,17 +3,22 @@ import time
 import math as m
 import mediapipe as mp
 from elevenlabs_tts import play_audio
-import pygame
 
-def badPosture(filename = 0):
+def badPosture(filename=0):
     def findDistance(x1, y1, x2, y2):
         dist = m.sqrt((x2-x1)**2+(y2-y1)**2)
         return dist
-    # Calculate angle.
+
     def findAngle(x1, y1, x2, y2):
-        theta = m.acos( (y2 -y1)*(-y1) / (m.sqrt(
-            (x2 - x1)**2 + (y2 - y1)**2 ) * y1) )
-        degree = int(180/m.pi)*theta
+        if y1 == 0:
+            return 0
+        denom = m.sqrt((x2 - x1)**2 + (y2 - y1)**2) * y1
+        if denom == 0:
+            return 0
+        ratio = (y2 - y1) * (-y1) / denom
+        ratio = max(-1, min(1, ratio))  # acos needs [-1, 1]
+        theta = m.acos(ratio)
+        degree = int(180 / m.pi * theta)
         return degree
     def sendWarning(image, font, red, w, h):
         cv2.putText(image, 'Fix posture', (w // 2 - 100, h // 2), font, 1, red, 2)
@@ -181,20 +186,16 @@ def badPosture(filename = 0):
                 time_string_bad = 'Bad Posture Time : ' + str(round(bad_time, 1)) + 's'
                 cv2.putText(image, time_string_bad, (10, h - 20), font, 0.9, red, 2)
 
-            # If you stay in bad posture for more than 5 seconds, show alert.
+            # If you stay in bad posture for more than 5 seconds, show alert then reset counter.
             if bad_time > 5:
                 sendWarning(image, font, red, w, h)
-                play_audio('ElevenLabs_2026-02-08T03_10_28_Northern Terry_pvc_sp87_s30_sb90_se38_b_m2.mp3')
+                play_audio('sounds/ElevenLabs_2026-02-08T03_10_28_Northern Terry_pvc_sp87_s30_sb90_se38_b_m2.mp3')
+                time.sleep(2)
+                bad_frames = 0  # reset so next alert only after another 5s of bad posture
             #video_output.write(image)
             cv2.imshow('Posture', image)
-            # Wait so video plays at real speed (~1/fps seconds per frame). For webcam, fps is used too.
-            delay_ms = max(1, int(1000 / (fps or 30)))
-            if cv2.waitKey(delay_ms) & 0xFF == ord('q'):
-                break
-
         cap.release()
         #video_output.release()
         cv2.destroyAllWindows()
-
 # Use a video file path, or 0 for webcam (when run on Windows).
-badPosture('videos/input.avi')
+badPosture(filename)
