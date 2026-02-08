@@ -42,7 +42,7 @@ def check_results(user_id, video):
         sys.exit(1)
     
 
-    
+    data = badPosture(video)
 
 
 

@@ -1,5 +1,6 @@
 import cv2
 import time
+from datetime import datetime, date, time, timezone
 import math as m
 import mediapipe as mp
 from elevenlabs_tts import play_audio
@@ -204,7 +205,8 @@ def badPosture(filename = 0):
                     for item in items:
                         sum += item
                     return sum/len(items)
-                returning_list.append(getAvg(angle_tracking_neck), getAvg(angle_tracking_back), getAvg(offset_tracking_shoulders))
+                returning_list.append((getAvg(angle_tracking_neck), getAvg(angle_tracking_back), getAvg(offset_tracking_shoulders), datetime.now(timezone.utc)))
+
 
                 sendWarning(image, font, red, w, h)
                 play_audio('sounds/ElevenLabs_2026-02-08T03_10_28_Northern Terry_pvc_sp87_s30_sb90_se38_b_m2.mp3')
@@ -218,5 +220,7 @@ def badPosture(filename = 0):
         #video_output.release()
         cv2.destroyAllWindows()
 
+    return returning_list
+
 # Use a video file path, or 0 for webcam (when run on Windows).
-badPosture(0)
+print(badPosture(0))
