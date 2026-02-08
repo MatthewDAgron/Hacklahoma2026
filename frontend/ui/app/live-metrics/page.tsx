@@ -1,6 +1,21 @@
+"use client";
+
 import Navbar from "../../components/sections/navbar/default";
 import { LayoutLines } from "../../components/ui/layout-lines";
 import { Activity, AlertTriangle, Camera, CheckCircle, Clock, Server, User } from "lucide-react";
+import { useEffect, useState } from "react";
+
+/** Stream URL: same host as page, port 5001 (posture_stream_server) */
+function PostureStream() {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setSrc(`http://${window.location.hostname}:5001/video_feed`);
+    }
+  }, []);
+  if (!src) return <div className="w-full h-full flex items-center justify-center text-white/40 text-sm">Loading stream...</div>;
+  return <img src={src} alt="Live Posture Detection Feed" className="w-full h-full object-contain" />;
+}
 
 export default function LiveMetrics() {
   return (
@@ -75,21 +90,15 @@ export default function LiveMetrics() {
                     </span>
                 </div>
                 
-                {/* PLACEHOLDER FOR VIDEO STREAM - Replace src with your MJPEG URL later */}
-                <div className="aspect-video bg-neutral-900 flex items-center justify-center relative">
-                    {/* Fake Grid Overlay for "Tech" feel */}
-                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
-                    <div className="text-center">
-                        <Camera className="w-12 h-12 text-white/20 mx-auto mb-2" />
-                        <p className="text-white/40 text-sm">Connecting to Stream...</p>
-                        <p className="text-white/20 text-xs font-mono mt-1">10.204.115.220:5000</p>
-                    </div>
+                {/* Live posture stream: Pi feed → posture_stream_server (bbl_test_task) → MJPEG */}
+                <div className="aspect-video bg-neutral-900 relative overflow-hidden">
+                    <PostureStream />
                 </div>
 
                 {/* Video Footer */}
                 <div className="p-4 border-t border-white/10 flex justify-between items-center bg-white/5">
                     <div className="text-xs font-mono text-muted-foreground">
-                        CAM_01 | 1080p | 30FPS
+                        Posture Detection (bbl_test_task) | Live
                     </div>
                     <button className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1 rounded text-white transition">
                         Expand View
