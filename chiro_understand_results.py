@@ -23,7 +23,7 @@ Database planning:
 
 
 def check_results(user_id, video):
-    # TODO
+    # TODO - automatically parse this to database
 
 
 
