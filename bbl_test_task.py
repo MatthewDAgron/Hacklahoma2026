@@ -54,10 +54,6 @@ def badPosture(filename = 0):
     )
 
     with PoseLandmarker.create_from_options(options) as landmarker:
-
-        
-
-
         # For webcam input use 0 (integer). For video file use a path string.
         cap = cv2.VideoCapture(filename)
         if not cap.isOpened():
@@ -211,9 +207,7 @@ def badPosture(filename = 0):
                 returning_list.append(getAvg(angle_tracking_neck), getAvg(angle_tracking_back), getAvg(offset_tracking_shoulders))
 
                 sendWarning(image, font, red, w, h)
-                play_audio('ElevenLabs_2026-02-08T03_10_28_Northern Terry_pvc_sp87_s30_sb90_se38_b_m2.mp3')
-
-            #video_output.write(image)
+                play_audio('sounds/ElevenLabs_2026-02-08T03_10_28_Northern Terry_pvc_sp87_s30_sb90_se38_b_m2.mp3')
             cv2.imshow('Posture', image)
             # Wait so video plays at real speed (~1/fps seconds per frame). For webcam, fps is used too.
             delay_ms = max(1, int(1000 / (fps or 30)))
@@ -225,4 +219,4 @@ def badPosture(filename = 0):
         cv2.destroyAllWindows()
 
 # Use a video file path, or 0 for webcam (when run on Windows).
-badPosture('videos/input.avi')
+badPosture(0)
