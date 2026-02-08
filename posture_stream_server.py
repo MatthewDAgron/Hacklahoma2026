@@ -2,11 +2,14 @@
 Posture Stream Server: Pulls live feed from Pi, runs bbl_test_task posture
 detection on each frame, and serves the processed MJPEG to the website.
 """
+import os
 import cv2
 import math as m
 import threading
 from flask import Flask, Response
 import mediapipe as mp
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # REPLACE WITH YOUR PI'S IP ADDRESS
 PI_IP = "10.204.115.220"
@@ -39,9 +42,9 @@ def find_angle(x1, y1, x2, y2):
 
 
 # Run pose detection every N frames; skip frames reuse last overlay (higher = smoother video, less posture updates)
-DETECT_EVERY_N = 2
+DETECT_EVERY_N = 4
 # Inference resolution (smaller = faster). None = use full frame.
-INFERENCE_H = 240
+INFERENCE_H = 160
 
 def generate_posture_frames():
     """Generator: read from Pi stream, run posture detection, yield JPEG frames."""
@@ -64,6 +67,7 @@ def generate_posture_frames():
     )
 
     cap = cv2.VideoCapture(STREAM_URL)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)  # Minimize buffer to reduce lag
     if not cap.isOpened():
         print("Could not open Pi stream. Is live_stream.py running on the Pi?")
         return
@@ -102,7 +106,7 @@ def generate_posture_frames():
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
             if not keypoints or not keypoints.pose_landmarks:
-                ret, buffer = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 85])
+                ret, buffer = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 75])
                 yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n")
                 continue
 
@@ -165,16 +169,16 @@ def generate_posture_frames():
             else:
                 cv2.putText(image, f"Bad Posture Time : {round(bad_time, 1)}s", (10, h - 20), font, 0.9, red, 2)
 
-            if bad_time > 5 and HAS_AUDIO and frame_index - last_audio_time > 150:
+            can_play = last_audio_time == 0 or (frame_index - last_audio_time) > 150
+            if bad_time > 5 and HAS_AUDIO and can_play:
                 last_audio_time = frame_index
+                bad_frames = 0
+                good_frames = 0
                 cv2.putText(image, "Fix posture", (w // 2 - 100, h // 2), font, 1, red, 2)
-                threading.Thread(
-                    target=play_audio,
-                    args=("sounds/ElevenLabs_2026-02-08T03_10_28_Northern Terry_pvc_sp87_s30_sb90_se38_b_m2.mp3",),
-                    daemon=True,
-                ).start()
+                sound_path = os.path.join(PROJECT_ROOT, "sounds", "mickey.mp3")
+                threading.Thread(target=play_audio, args=(sound_path,), daemon=True).start()
 
-            ret, buffer = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            ret, buffer = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 75])
             yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + buffer.tobytes() + b"\r\n")
 
     cap.release()

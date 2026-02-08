@@ -1,23 +1,26 @@
+import os
 import subprocess
+import sys
 
 
 def play_audio(sound_file):
-    """Play an audio file (e.g. MP3). Uses ffplay (ffmpeg) - no Python audio deps. Works on AWS/Linux."""
+    """Play an audio file (MP3). Non-blocking. Uses ffplay (auto-closes); falls back to os.startfile on Windows."""
+    if not os.path.exists(sound_file):
+        return
     try:
-        subprocess.run(
+        # ffplay with -autoexit closes when done; works on Windows if ffmpeg is installed
+        subprocess.Popen(
             ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", sound_file],
-            check=True,
-            timeout=120,
-            capture_output=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
     except FileNotFoundError:
-        pass  # ffplay not installed (install ffmpeg), skip playback
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
-        pass
+        if sys.platform == "win32":
+            os.startfile(sound_file)  # Opens default player (may stay open)
 
 
 def main():
-    play_audio("sounds/ElevenLabs_2026-02-08T03_10_28_Northern Terry_pvc_sp87_s30_sb90_se38_b_m2.mp3")
+    play_audio("sounds/mickey.mp3")
 
 
 if __name__ == "__main__":
