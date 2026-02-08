@@ -12,13 +12,13 @@ DB_NAME = "hackathon_db"
 COLLECTION_NAME = "video_stream"
 
 # VIDEO SETTINGS
-FPS = 10.0           # Lowered to 10 for better stability on Pi
+FPS = 10.0           
 SEGMENT_SEC = 15     # Target length
 OVERLAP_SEC = 5      # New video every 5 seconds
 
-# CALCULATED CONSTANTS (The Math)
-FRAMES_PER_SEGMENT = int(SEGMENT_SEC * FPS) # 15 * 10 = 150 frames
-FRAMES_BETWEEN_STARTS = int(OVERLAP_SEC * FPS) # 5 * 10 = 50 frames
+# CALCULATED CONSTANTS
+FRAMES_PER_SEGMENT = int(SEGMENT_SEC * FPS) # 150 frames
+FRAMES_BETWEEN_STARTS = int(OVERLAP_SEC * FPS) # 50 frames
 RES = (640, 480)
 
 # --- SETUP ---
@@ -58,20 +58,21 @@ def upload_worker(filename, timestamp, duration):
 class VideoSegment:
     def __init__(self, start_id):
         self.start_ts = datetime.utcnow()
-        self.filename = f"vid_{int(time.time())}.mp4"
+        
+        # --- RESTORED TO AVI ---
+        self.filename = f"vid_{int(time.time())}.avi"
+        
+        # --- RESTORED TO XVID (Safe Codec) ---
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        self.writer = cv2.VideoWriter(self.filename, fourcc, FPS, RES, isColor=False)
         self.frame_count = 0
         self.is_active = True
-        
-        # XVID is the safest codec for AVI
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        self.writer = cv2.VideoWriter(self.filename, fourcc, FPS, RES, isColor=False)
         
     def add_frame(self, frame):
         if self.is_active:
             self.writer.write(frame)
             self.frame_count += 1
             
-            # Check if done based on FRAME COUNT, not time
             if self.frame_count >= FRAMES_PER_SEGMENT:
                 self.finish()
 
@@ -80,7 +81,7 @@ class VideoSegment:
         self.writer.release()
         print(f"[COMPLETED] {self.filename} ({self.frame_count} frames)")
         
-        # Trigger Upload
+        # DIRECT UPLOAD (No Conversion)
         t = threading.Thread(target=upload_worker, args=(self.filename, self.start_ts, SEGMENT_SEC))
         t.start()
 
@@ -94,36 +95,30 @@ time.sleep(2)
 active_segments = []
 master_frame_count = 0 
 
-print(f"--- ROLLING RECORDER (Frame Locked) ---")
+print(f"--- ROLLING RECORDER (AVI MODE) ---")
 print(f"Target: {SEGMENT_SEC}s clips ({FRAMES_PER_SEGMENT} frames)")
-print(f"Overlap: New clip every {FRAMES_BETWEEN_STARTS} frames")
-print("Press Ctrl+C to stop (Wait at least 20s for first file!)")
+print("Press Ctrl+C to stop")
 
 try:
     while True:
         ret, frame = cap.read()
         if not ret: break
         
-        # Grayscale
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         
-        # 1. Start NEW segment? (Every 50 frames)
+        # Start NEW segment?
         if master_frame_count % FRAMES_BETWEEN_STARTS == 0:
             new_seg = VideoSegment(master_frame_count)
             active_segments.append(new_seg)
             print(f"[START] Segment {len(active_segments)} active")
             
-        # 2. Write to ALL active segments
-        # Iterate over a copy [:] so we can remove items safely
+        # Write to active segments
         for seg in active_segments[:]:
             seg.add_frame(gray)
             if not seg.is_active:
                 active_segments.remove(seg)
                 
         master_frame_count += 1
-        
-        # Small sleep if Pi is running too hot/fast (unlikely)
-        # time.sleep(0.01)
 
 except KeyboardInterrupt:
     print("\nStopping...")
